@@ -10,6 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/images")
@@ -25,17 +27,22 @@ public class ImageMetadataController {
 
     // Endpoint for uploading image
     @PostMapping("/upload")
-    public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<Map<String, String>> uploadImage(@RequestParam("file") MultipartFile file) {
         try {
-            // Convert MultipartFile to Blob
             byte[] blob = file.getInputStream().readAllBytes();
 
             // Call the service layer to save the image
             imageMetadataService.uploadImage(blob, file.getContentType());
 
-            return ResponseEntity.status(HttpStatus.CREATED).body("Image uploaded successfully.");
+            // Return a JSON response
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Image uploaded successfully.");
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to upload image.");
+            Map<String, String> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to upload image.");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
+
 }
